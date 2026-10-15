@@ -1,0 +1,47 @@
+name: Test Leapwork Action
+ 
+on:
+# Manual run from GitHub Actions UI
+workflow_dispatch:
+inputs:
+schedule:
+description: "Leapwork Schedule ID (optional)"
+required: false
+type: string
+ 
+# Run automatically Monday-Friday at 18:00 UTC
+schedule:
+- cron: '0 18 * * 1-5'
+ 
+permissions:
+contents: read
+issues: write
+ 
+jobs:
+run-action:
+name: Test with Leapwork
+ 
+# Self-hosted runner labels
+runs-on:
+- self-hosted
+ 
+# GitHub Environment
+environment: leapwork_test
+ 
+# Kill the job if it exceeds 2 hours
+timeout-minutes: 120
+ 
+steps:
+- name: Checkout repository
+uses: actions/checkout@v4
+with:
+fetch-depth: 0
+persist-credentials: false
+ 
+- name: Call Leapwork GitHub Action
+uses: leapwork/github-action@v1.0
+with:
+leapworkApiUrl: ${{ vars.LEAPWORK_API_URL }}
+leapworkApiKey: ${{ secrets.LEAPWORK_API_KEY }}
+leapworkSchedule: ${{ github.event.inputs.schedule || vars.LEAPWORK_SCHEDULE }}
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
